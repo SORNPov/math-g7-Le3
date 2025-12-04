@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>លំហាត់គណិតវិទ្យាថ្នាក់ទី៧</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans Khmer', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.8;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            padding: 20px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .score-board {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        
+        .score-item {
+            text-align: center;
+        }
+        
+        .score-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        
+        .score-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .quiz-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: none;
+        }
+        
+        .quiz-card.active {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+        
+        .question {
+            font-size: 1.3em;
+            margin-bottom: 25px;
+            color: #333;
+        }
+        
+        .answer-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-family: 'Noto Sans Khmer', sans-serif;
+            transition: border-color 0.3s;
+        }
+        
+        .answer-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 15px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Noto Sans Khmer', sans-serif;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .btn-check {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-check:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        
+        .btn-next {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .btn-next:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .feedback {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .feedback.show {
+            display: block;
+        }
+        
+        .feedback.correct {
+            background: #c6f6d5;
+            color: #22543d;
+            border-left: 4px solid #48bb78;
+        }
+        
+        .feedback.incorrect {
+            background: #fed7d7;
+            color: #742a2a;
+            border-left: 4px solid #f56565;
+        }
+        
+        .solution {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border-left: 4px solid #667eea;
+            display: none;
+            white-space: pre-line;
+        }
+        
+        .solution.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        .solution-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .results {
+            display: none;
+            text-align: center;
+        }
+        
+        .results.show {
+            display: block;
+            animation: slideIn 0.5s;
+        }
+        
+        .results h2 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        
+        .final-score {
+            font-size: 4em;
+            color: #48bb78;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        
+        .btn-restart {
+            background: #667eea;
+            color: white;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Noto Sans Khmer', sans-serif;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+        
+        .btn-restart:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>តេស្តគណិតវិទ្យាថ្នាក់ទី៧</h1>
+            <p>មេរៀនទី២៖ តួចែក និងពហុគុណ</p>
+        </div>
+        
+        <div class="score-board">
+            <div class="score-item">
+                <div class="score-label">លំហាត់</div>
+                <div class="score-value"><span id="current-question">១</span>/<span id="total-questions"></span></div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">ឆ្លើយត្រូវបាន</div>
+                <div class="score-value" id="score">០</div>
+            </div>
+        </div>
+        
+        <div id="quiz-container"></div>
+        
+        <div class="quiz-card results" id="results">
+            <h2>🎉 រួចរាល់!</h2>
+            <p style="font-size: 1.3em; margin-bottom: 10px;">អ្នកឆ្លើយត្រូវបាន</p>
+            <div class="final-score" id="final-score">០/០</div>
+            <p style="font-size: 1.2em; color: #666;" id="percentage"></p>
+            <button class="btn-restart" onclick="restartQuiz()">ចាប់ផ្តើមឡើងវិញ</button>
+        </div>
+    </div>
+    
+    <script>
+        const quizData = [{"question": "គណនា  \\(309-2\\times(10-170\\div 34)-190\\)", "answer": "109", "solution": "គេបាន\n\\[\n\\begin{align*}\n309-2\\times(10-170\\div 34)-190 \n&= 309-2\\times(10-5)-190\\\\\n&= 309 -2\\times 5-190\\\\\n&= 309 -10 -190\\\\\n&= 109\n\\end{align*}\n\\]"}, {"question": "គណនា  \\(100+200\\times[-3\\times 2+17\\times(-2)+9]\\)", "answer": "-6100", "solution": "គេបាន \n\\[\n\\begin{align*}\n100 + 200 \\times [-3 \\times 2 + 17 \\times (-2) + 9]\n&= 100 + 200 \\times [-6 -34 + 9]\\\\\n&= 100 + 200 \\times [-40 + 9]\\\\\n&= 100 + 200 \\times (-31)\\\\\n&= 100 - 6200\\\\\n&= -6100\n\\end{align*}\n\\]"}, {"question": "គណនា  \\(190-[17\\times(4-12)-125\\div(2-7)]\\)", "answer": "301", "solution": "គេបាន \n\\[\n\\begin{align*}\n190 - [17 \\times (4 - 12) - 125 \\div (2 - 7)]\n&= 190 - [17 \\times (-8) - 125 \\div (-5)]\\\\\n&= 190 - [-136 - (-25)]\\\\\n&= 190 - [-136 + 25]\\\\\n&= 190 - (-111)\\\\\n&= 190 + 111\\\\\n&= 301\n\\end{align*}\n\\]"}, {"question": "គណនា \\(2480\\div\\{[150+(40\\div 8)]\\times[-7-(9)]\\}\\)", "answer": "-1", "solution": "គេបាន  \n\\[\n\\begin{align*}\n2480 \\div \\{ [150 + (40 \\div 8)] \\times [-7 - (9)] \\}\n&= 2480 \\div \\{ [150 + 5] \\times [-7 - 9] \\}\\\\\n&= 2480 \\div \\{ 155 \\times (-16) \\}\\\\\n&= 2480 \\div (-2480)\\\\\n&= -1\n\\end{align*}\n\\]"}, {"question": "គណនា \\(-100+(-200)-(-300)+(-400)-(-500)-900-(+400)-(-1000)\\)", "answer": "-200", "solution": "គេបាន \n\\[\n\\begin{align*}\n-100 + (-200)& - (-300) + (-400) - (-500) -900 - (+400) - (-1000)\\\\\n&= -100 -200 +300 -400 +500 -900 -400 +1000\\\\\n&= -300 +300 -400 +500 -900 -400 +1000\\\\\n&= 0 -400 +500 -900 -400 +1000\\\\\n&= -400 +500 -900 -400 +1000\\\\\n&= 100 -900 -400 +1000\\\\\n&= -800 -400 +1000\\\\\n&= -1200 +1000\\\\\n&= -200\n\\end{align*}\n\\]"}, {"question": "គណនា \\([7-(1-32)+18]\\div(1-16+13)\\times[-48-(-53)+2]\\)", "answer": "-196", "solution": "គេបាន \n\\[\n\\begin{align*}\n[7 - (1 & - 32) + 18] \\div (1 - 16 + 13) \\times [-48 - (-53) + 2]\\\\\n&= [7 - (-31) + 18] \\div (1 - 16 + 13) \\times [-48 + 53 + 2]\\\\\n&= [7 + 31 + 18] \\div (-15 + 13) \\times [5 + 2]\\\\\n&= 56 \\div (-2) \\times 7\\\\\n&= -28 \\times 7\\\\\n&= -196\n\\end{align*}\n\\]"}, {"question": "គណនា  \n\\(\\Big[14 - \\big(-3 - (8 - 21)\\times 4\\big) + 27\\Big]\\div(2-19+11)\\times\\Big[ -60 -(-47+5) + 9\\Big]-\\dfrac{36 - 6\\times 5}{-3+8-4}\\)", "answer": "-18", "solution": "គេបាន  \n\\[\n\\begin{align*}\n&\\Big[14 - \\big(-3 - (8 - 21)\\times 4\\big) + 27\\Big]\\div(2-19+11)\\times\\Big[ -60 -(-47+5) + 9\\Big]-\\dfrac{36 - 6\\times 5}{-3+8-4}\\\\\n&= \\Big[14 - \\big(-3 - (-13)\\times 4\\big) + 27\\Big]\\div(2-19+11)\\times\\Big[ -60 -(-42) + 9\\Big]-\\dfrac{36 - 30}{1}\\\\\n&= \\Big[14 - \\big(-3 + 52\\big) + 27\\Big]\\div(-6)\\times\\Big[ -60 + 42 + 9\\Big]-6\\\\\n&= \\Big[14 - 49 + 27\\Big]\\div(-6)\\times(-9)-6\\\\\n&= [-8]\\div(-6)\\times(-9)-6\\\\\n&= \\dfrac{4}{3}\\times(-9)-6\\\\\n&= -12 - 6\\\\\n&= -18\n\\end{align*}\n\\]"}, {"question": "គណនា  \n\\( \\Big[21 - \\big( -8 - (4-13)\\times3 \\big) + 6 \\Big] \\div \\big( -5 + 2 -1 \\big) \\times \\Big[ -50 - \\big( -20 - (2\\times(-6))\\big) + 10 \\Big] + \\big( 24 \\div (-3+9-5) \\big)\\)", "answer": "88", "solution": "គេបាន  \n\\[\n\\begin{align*}\n&\\Big[21 - \\big( -8 - (4-13)\\times3 \\big) + 6 \\Big] \\div \\big( -5 + 2 -1 \\big) \\times \\Big[ -50 - \\big( -20 - (2\\times(-6))\\big) + 10 \\Big] + \\big( 24 \\div (-3+9-5) \\big)\\\\\n&= \\Big[21 - \\big( -8 - (-9)\\times3 \\big) + 6 \\Big] \\div (-4) \\times \\Big[ -50 - \\big( -20 - (-12)\\big) + 10 \\Big] + 24\\\\\n&= \\Big[21 - \\big( -8 + 27 \\big) + 6 \\Big] \\div (-4) \\times \\Big[ -50 - (-8) + 10 \\Big] + 24\\\\\n&= \\Big[21 - 19 + 6 \\Big] \\div (-4) \\times (-32) + 24\\\\\n&= 8 \\div (-4) \\times (-32) + 24\\\\\n&= -2 \\times (-32) + 24\\\\\n&= 64 + 24\\\\\n&= 88\n\\end{align*}\n\\]"}, {"question": "នាវាមុជទឹកមួយកំពុងស្ថិតនៅជម្រៅ ២០០ ម៉ែត្រក្រោមផ្ទៃទឹក។  \nនាវាបានមុជចុះក្រោមថែម ៥០ ម៉ែត្រទៀត។  \nបន្ទាប់មកនាវាបានងើបឡើងលើវិញ ៨០ ម៉ែត្រ។  \nតើពេលនេះនាវាមុជទឹកស្ថិតនៅជម្រៅប៉ុន្មានម៉ែត្រពីផ្ទៃទឹក?", "answer": "170", "solution": "គេបាន  \n- ជម្រៅដំបូង \\(= 200 \\)ម៉ែត្រ\n- បន្ទាប់ពីមុជចុះក្រោម: \\( 200 + 50 = 250 \\) ម៉ែត្រ\n- បន្ទាប់ពីងើបឡើង:  \\(250 - 80 = 170 \\) ម៉ែត្រ\n\n\nដូច្នេះ នាវាមុជទឹកស្ថិតនៅជម្រៅ \\(170\\) ម៉ែត្រពីផ្ទៃទឹក"}, {"question": "នៅក្នុងការប្រឡងគណិតវិទ្យាមួយ មានលក្ខខណ្ឌដូចខាងក្រោម៖  \n- ឆ្លើយត្រូវមួយសំណួរទទួលបាន +៥ ពិន្ទុ  \n- ឆ្លើយខុសមួយសំណួរទទួលបាន -២ ពិន្ទុ  \n\nសុខាឆ្លើយសំណួរបានទាំងអស់ ១០ សំណួរ ដោយឆ្លើយត្រូវ ៧ សំណួរ និងឆ្លើយខុស ៣ សំណួរ។ តើសុខាទទួលបានពិន្ទុសរុបចំនួនប៉ុន្មាន?", "answer": "29", "solution": "គេបាន  \n\n- ពិន្ទុពីសំណួរត្រូវ \\(= 7 \\times 5 = 35 \\)\n- ពិន្ទុពីសំណួរខុស \\(= 3 \\times (-2) = -6\\)\n- ពិន្ទុសរុប \\(= 35 + (-6) = 29\\)\n\n\nដូច្នេះ សុខាទទួលបានពិន្ទុសរុបចំនួន \\(29\\) ពិន្ទុ"}, {"question": "ក្រុមស្រាវជ្រាវមួយកំពុងសិក្សាពីការប្រែប្រួលសីតុណ្ហភាពនៅលើភ្នំមួយ។  \n- នៅថ្ងៃចន្ទមានសីតុណ្ហភាព \\(-18^{\\circ}C\\)  \n- នៅថ្ងៃអង្គារសីតុណ្ហភាពបានកើនឡើង \\(12^{\\circ}C\\)  \n- នៅថ្ងៃពុធខ្យល់ត្រជាក់បានបណ្តាលឱ្យសីតុណ្ហភាពធ្លាក់ចុះ៣ដងនៃសីតុណ្ហភាពថ្ងៃអង្គារ  \n- នៅថ្ងៃព្រហស្បតិ៍ក្រុមការងារបានប្រើឧបករណ៍កម្តៅពិសេសមួយដែលបានបង្កើនសីតុណ្ហភាព \\(24^{\\circ}C\\) លើថ្ងៃពុធ។  \n\nកំណត់សីតុណ្ហភាពនៅថ្ងៃសុក្រ បើគេដឹងថាសីតុណ្ហភាពថ្ងៃសុក្រជាមធ្យមនៃសីតុណ្ហភាពថ្ងៃទាំងបួនដំបូង។", "answer": "-9", "solution": "គេបាន  \n\n- ថ្ងៃចន្ទ \\( T_1 = -18^{\\circ}C \\)\n- ថ្ងៃអង្គារ \\(T_2 = -18 + 12 = -6^{\\circ}C\\)\n- ថ្ងៃពុធ \\(T_3 = 3 \\times (-6) = -18^{\\circ}C\\)\n- ថ្ងៃព្រហស្បតិ៍ \\( T_4 = -18 + 24 = 6^{\\circ}C\\)\n- ថ្ងៃសុក្រ \\( T_5 = \\dfrac{T_1 + T_2 + T_3 + T_4}{4} = \\dfrac{-18 + (-6) + (-18) + 6}{4} = \\dfrac{-36}{4} = -9^{\\circ}C\\)\n\nដូន្នេះ ថ្ងៃសុក្រមានសីតុណ្ហភាព \\(-9^{\\circ}C\\)"}];
+        
+        let currentQuestion = 0;
+        let score = 0;
+        let answered = false;
+        
+        function toKhmerNumber(num) {
+            const khmerDigits = ['០', '១', '២', '៣', '៤', '៥', '៦', '៧', '៨', '៩'];
+            return String(num).split('').map(digit => khmerDigits[parseInt(digit)]).join('');
+        }
+        
+        function init() {
+            document.getElementById('total-questions').textContent = toKhmerNumber(quizData.length);
+            renderQuestion();
+        }
+        
+        function renderQuestion() {
+            const container = document.getElementById('quiz-container');
+            const q = quizData[currentQuestion];
+            
+            container.innerHTML = `
+                <div class="quiz-card active">
+                    <div class="question-number">លំហាត់ទី${toKhmerNumber(currentQuestion + 1)}</div>
+                    <div class="question">${q.question}</div>
+                    <input type="text" class="answer-input" id="answer-input" placeholder="បញ្ចូលចម្លើយរបស់អ្នក..." onkeypress="handleKeyPress(event)">
+                    <div class="btn-group">
+                        <button class="btn btn-check" onclick="checkAnswer()">ពិនិត្យ</button>
+                        <button class="btn btn-next" id="next-btn" onclick="nextQuestion()" disabled>បន្ទាប់</button>
+                    </div>
+                    <div class="feedback" id="feedback"></div>
+                    <div class="solution" id="solution">
+                        <div class="solution-title">ដំណោះស្រាយ:</div>
+                        <div>${q.solution}</div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('current-question').textContent = toKhmerNumber(currentQuestion + 1);
+            document.getElementById('answer-input').focus();
+            answered = false;
+            
+            // Render MathJax
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+        
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !answered) {
+                checkAnswer();
+            }
+        }
+        
+        function checkAnswer() {
+            if (answered) return;
+            
+            const userAnswer = document.getElementById('answer-input').value.trim();
+            const correctAnswer = quizData[currentQuestion].answer;
+            const feedback = document.getElementById('feedback');
+            const solution = document.getElementById('solution');
+            
+            answered = true;
+            
+            if (userAnswer === correctAnswer) {
+                score++;
+                feedback.className = 'feedback correct show';
+                feedback.innerHTML = '✅ ត្រឹមត្រូវ! ល្អណាស់!';
+                document.getElementById('score').textContent = toKhmerNumber(score);
+            } else {
+                feedback.className = 'feedback incorrect show';
+                feedback.innerHTML = `❌ មិនត្រឹមត្រូវទេ!</strong>`;
+            }
+            
+            solution.classList.add('show');
+            document.getElementById('next-btn').disabled = false;
+            document.getElementById('answer-input').disabled = true;
+            
+            // Render MathJax for solution
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+        
+        function nextQuestion() {
+            currentQuestion++;
+            
+            if (currentQuestion < quizData.length) {
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+        
+        function showResults() {
+            document.getElementById('quiz-container').style.display = 'none';
+            document.querySelector('.score-board').style.display = 'none';
+            
+            const results = document.getElementById('results');
+            const percentage = Math.round((score / quizData.length) * 100);
+            
+            document.getElementById('final-score').textContent = `${toKhmerNumber(score)}/${toKhmerNumber(quizData.length)}`;
+            document.getElementById('percentage').textContent = `${toKhmerNumber(percentage)}%`;
+            
+            results.classList.add('show');
+        }
+        
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            answered = false;
+            
+            document.getElementById('score').textContent = toKhmerNumber(0);
+            document.getElementById('quiz-container').style.display = 'block';
+            document.querySelector('.score-board').style.display = 'flex';
+            document.getElementById('results').classList.remove('show');
+            
+            renderQuestion();
+        }
+        
+        // Initialize quiz on page load
+        init();
+    </script>
+</body>
+</html>
